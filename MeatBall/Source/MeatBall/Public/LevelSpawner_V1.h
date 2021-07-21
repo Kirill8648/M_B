@@ -20,8 +20,20 @@ UCLASS()
 class MEATBALL_API ALevelSpawner_V1 : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+		// Sets default values for this actor's properties
+		ALevelSpawner_V1();
+
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+public:
+	struct Vector
+	{
+		int x;
+		int y;
+	};
 	UPROPERTY(EditAnywhere) int NumberOf1CellRooms;
 	UPROPERTY(EditAnywhere) int NumberOf2CellRooms;
 	UPROPERTY(EditAnywhere) int NumberOf4CellRooms;
@@ -30,19 +42,24 @@ public:
 	UPROPERTY(EditAnywhere) int LevelsGridSize;
 	UPROPERTY(EditAnywhere) int MatrixVerticalSize;
 	UPROPERTY(EditAnywhere) int MatrixHorizontalSize;
+	UPROPERTY(EditAnywhere) int NumberOfRoomsToSpawn;
+
+	int CounterToSpawn = 500;
 	std::vector<std::vector<int>> matrix;
 
-	// Sets default values for this actor's properties
-	ALevelSpawner_V1();
-
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	void DrawRoomCreationMassage(bool, FString);
-	void SpawnRoom(UWorld* world, FString RoomName, FVector RoomVector, FRotator RoomRotator, int UniqueIndex);
+	//void DrawRoomCreationMassage(bool, FString);
+	void SpawnRoom(UWorld*, FString, FVector, FRotator, int);
 	void RecursivePath(int, int, int, int, UWorld*);
+	static void PrintMap(std::vector<std::vector<int>>& mas);
+
+	static int obr_point_int(std::vector<std::vector<int>>& mas, int x, int y);
+	static int procedure_gen_mega_rand_with_rand_room_int(std::vector<std::vector<int>>& mas, int number_rooms);
+	static void Generation_Map_Test1_int(std::vector<std::vector<int>>& mas, int number_rooms);
+	static int fun_long_room_int(std::vector<std::vector<int>>& mas, int lenght_room, int x, int y);
+	static int fun_fin_long_room_int(std::vector<std::vector<int>>& mas, int lenght_room, int x, int y, int vec_x, int vex_y);
+	static int change_data_int(std::vector<std::vector<int>>& mas, int lenght_room, int& x, int& y, int vec_x, int vec_y);
+	static void delete_walls(std::vector<std::vector<int>>& mas);
+
 };

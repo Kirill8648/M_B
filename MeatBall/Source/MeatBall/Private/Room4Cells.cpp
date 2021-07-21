@@ -41,7 +41,7 @@ FString Room4Cells::GenerateRoomName(int NumberOf4CellRooms)
 
 	FString TempName = "Room_4_" + TempCode + "_";
 	TempName.AppendInt(FGenericPlatformMath::Rand() % NumberOf4CellRooms);
-	
+
 	return ReturningName.Append(TempName + "." + TempName);
 }
 

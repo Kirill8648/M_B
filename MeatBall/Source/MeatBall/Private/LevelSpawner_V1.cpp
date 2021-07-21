@@ -11,19 +11,395 @@ ALevelSpawner_V1::ALevelSpawner_V1()
 
 }
 
-void ALevelSpawner_V1::DrawRoomCreationMassage(bool Check, FString RoomName) {
-	Check ? GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Cyan, "Room " + RoomName + " spawned succesfully") :
-		GEngine->AddOnScreenDebugMessage(-1, 20.0f, FColor::Red, "Room spawn with path " + RoomName + " failed");
+int ALevelSpawner_V1::procedure_gen_mega_rand_with_rand_room_int(std::vector<std::vector<int>>& mas, int number_rooms)
+{
+	int hero_x = mas[0].size() / 2;
+	int hero_y = mas.size() / 2;
+
+	mas[hero_y][hero_x] = 8;
+
+	int room = -1;
+
+	int prev_room = 0;
+
+	int direction = FGenericPlatformMath::Rand() % 4;
+	int prev_direction = 0;
+
+	Vector prev_vec_dis{ 0,-1 };
+	int lenght_room = 2;
+
+	for (int i = 0; i < number_rooms; i++)
+	{
+		int flag = 0;
+
+		Vector vec_dis{ 1,0 };
+
+		room = FGenericPlatformMath::Rand() % 10;
+
+		if (i == number_rooms - 1)
+		{
+			room = 0;
+		}
+
+		float sum_time = 0;
+
+		if (room >= 0 && room < 9)
+		{
+			while (!flag)
+			{
+				int check_1 = obr_point_int(mas, hero_x + 1, hero_y);
+				int check_2 = obr_point_int(mas, hero_x - 1, hero_y);
+				int check_3 = obr_point_int(mas, hero_x, hero_y + 1);
+				int check_4 = obr_point_int(mas, hero_x, hero_y - 1);
+
+				if (check_1 > 1 && check_2 > 1 && check_3 > 1 && check_4 > 1)
+				{
+					return 1;
+				}
+
+				direction = FGenericPlatformMath::Rand() % 4;
+
+				if (direction == 0)
+				{
+					vec_dis.x = 0;
+					vec_dis.y = -1;
+				}
+				else if (direction == 1)
+				{
+					vec_dis.x = 1;
+					vec_dis.y = 0;
+				}
+				else if (direction == 2)
+				{
+					vec_dis.x = 0;
+					vec_dis.y = 1;
+				}
+				else
+				{
+					vec_dis.x = -1;
+					vec_dis.y = 0;
+				}
+
+				if (obr_point_int(mas, hero_x + vec_dis.x, hero_y + vec_dis.y) == 1 && mas[hero_y + vec_dis.y][hero_x + vec_dis.x] == 0)
+				{
+					flag = 1;
+				}
+			}
+			hero_x += vec_dis.x;
+			hero_y += vec_dis.y;
+
+			if (i != number_rooms - 1)
+			{
+				mas[hero_y][hero_x] = 1;
+
+			}
+			else
+			{
+				mas[hero_y][hero_x] = 9;
+
+			}
+		}
+		else
+		{
+			while (!flag)
+			{
+
+				if (fun_long_room_int(mas, lenght_room, hero_x, hero_y))
+				{
+					return 1;
+				}
+
+				direction = FGenericPlatformMath::Rand() % 4;
+
+				if (direction == 0)
+				{
+					vec_dis.x = 0;
+					vec_dis.y = -1;
+				}
+				else if (direction == 1)
+				{
+					vec_dis.x = 1;
+					vec_dis.y = 0;
+				}
+				else if (direction == 2)
+				{
+					vec_dis.x = 0;
+					vec_dis.y = 1;
+				}
+				else
+				{
+					vec_dis.x = -1;
+					vec_dis.y = 0;
+				}
+
+				if (fun_fin_long_room_int(mas, lenght_room, hero_x, hero_y, vec_dis.x, vec_dis.y))
+				{
+					flag = 1;
+				}
+			}
+
+			change_data_int(mas, lenght_room, hero_x, hero_y, vec_dis.x, vec_dis.y);
+		}
+
+		prev_room = room;
+		prev_direction = direction;
+		prev_vec_dis = vec_dis;
+	}
+
+	return 0;
 }
+
+void ALevelSpawner_V1::Generation_Map_Test1_int(std::vector<std::vector<int>>& mas, int number_rooms)
+{
+
+	int N = mas.size();
+	int M = mas[0].size();
+
+	for (size_t i = 0; i < N; i++)
+	{
+		for (size_t j = 0; j < M; j++)
+		{
+			mas[i][j] = 0;
+		}
+	}
+
+	for (int i = 0; i < M; i++)
+	{
+		mas[0][i] = 11;
+		mas[1][i] = 11;
+		mas[2][i] = 11;
+
+		mas[N - 1][i] = 11;
+		mas[N - 2][i] = 11;
+		mas[N - 3][i] = 11;
+	}
+
+	for (int i = 0; i < N; i++)
+	{
+		mas[i][0] = 11;
+		mas[i][1] = 11;
+		mas[i][2] = 11;
+
+		mas[i][M - 1] = 11;
+		mas[i][M - 2] = 11;
+		mas[i][M - 3] = 11;
+	}
+
+	while (procedure_gen_mega_rand_with_rand_room_int(mas, number_rooms))
+	{
+		for (size_t i = 0; i < N; i++)
+		{
+			for (size_t j = 0; j < M; j++)
+			{
+				mas[i][j] = 0;
+			}
+		}
+
+		for (int i = 0; i < M; i++)
+		{
+			mas[0][i] = 11;
+			mas[1][i] = 11;
+			mas[2][i] = 11;
+
+			mas[N - 1][i] = 11;
+			mas[N - 2][i] = 11;
+			mas[N - 3][i] = 11;
+		}
+
+		for (int i = 0; i < N; i++)
+		{
+			mas[i][0] = 11;
+			mas[i][1] = 11;
+			mas[i][2] = 11;
+
+			mas[i][M - 1] = 11;
+			mas[i][M - 2] = 11;
+			mas[i][M - 3] = 11;
+		}
+	}
+
+	delete_walls(mas);
+}
+
+int ALevelSpawner_V1::fun_long_room_int(std::vector<std::vector<int>>& mas, int lenght_room, int x, int y)
+{
+
+	int obr_add_x = 0;
+	int obr_sub_x = 0;
+
+	int obr_add_y = 0;
+	int obr_sub_y = 0;
+
+	if (obr_point_int(mas, x + 1, y) > 1)
+	{
+		obr_add_x++;
+	}
+
+	if (obr_point_int(mas, x - 1, y) > 1)
+	{
+		obr_sub_x++;
+	}
+
+	if (obr_point_int(mas, x, y + 1) > 1)
+	{
+		obr_add_y++;
+	}
+
+	if (obr_point_int(mas, x, y - 1) > 1)
+	{
+		obr_sub_y++;
+	}
+
+	for (int i = 2; i <= lenght_room; i++)
+	{
+		if (obr_point_int(mas, x + i, y) > 0)
+		{
+			obr_add_x++;
+		}
+
+		if (obr_point_int(mas, x - i, y) > 0)
+		{
+			obr_sub_x++;
+		}
+
+		if (obr_point_int(mas, x, y + i) > 0)
+		{
+			obr_add_y++;
+		}
+
+		if (obr_point_int(mas, x, y - i) > 0)
+		{
+			obr_sub_y++;
+		}
+	}
+
+	if (obr_add_x > 0 && obr_add_y > 0 && obr_sub_y > 0 && obr_sub_y > 0)
+	{
+		return 1;
+	}
+
+	return 0;
+}
+
+int ALevelSpawner_V1::fun_fin_long_room_int(std::vector<std::vector<int>>& mas, int lenght_room, int x, int y, int vec_x, int vex_y)
+{
+	int obr_total = 0;
+
+	if (obr_point_int(mas, x + vec_x, y + vex_y) == 1)
+	{
+		obr_total++;
+	}
+
+	for (int i = 2; i <= lenght_room; i++)
+	{
+		if (obr_point_int(mas, x + vec_x * i, y + vex_y * i) == 0)
+		{
+			obr_total++;
+		}
+	}
+
+	for (int i = 1; i <= lenght_room; i++)
+	{
+		if (mas[y + vex_y * i][x + vec_x * i] == 0)
+		{
+			obr_total++;
+		}
+	}
+
+	if (obr_total == (lenght_room * 2))
+	{
+		return 1;
+	}
+
+	return 0;
+}
+
+int ALevelSpawner_V1::change_data_int(std::vector<std::vector<int>>& mas, int lenght_room, int& x, int& y, int vec_x, int vec_y)
+{
+	for (int i = 1; i <= lenght_room; i++)
+	{
+		mas[y + vec_y * i][x + vec_x * i] = lenght_room;
+	}
+
+	x += vec_x * lenght_room;
+	y += vec_y * lenght_room;
+
+	return 0;
+}
+
+int ALevelSpawner_V1::obr_point_int(std::vector<std::vector<int>>& mas, int x, int y)
+{
+	int flag = 0;
+
+	if (mas[y + 1][x] != 0)
+	{
+		flag++;
+	}
+
+	if (mas[y - 1][x] != 0)
+	{
+		flag++;
+	}
+
+	if (mas[y][x + 1] != 0)
+	{
+		flag++;
+	}
+
+	if (mas[y][x - 1] != 0)
+	{
+		flag++;
+	}
+
+	return flag;
+}
+
+void ALevelSpawner_V1::delete_walls(std::vector<std::vector<int>>& mas)
+{
+	for (int i = 0; i < mas.size(); i++)
+	{
+		for (int j = 0; j < mas[i].size(); j++)
+		{
+			if (mas[i][j] == 11)
+			{
+				mas[i][j] = 0;
+			}
+		}
+	}
+}
+
+/*void ALevelSpawner_V1::DrawRoomCreationMassage(bool Check, FString RoomName)
+{
+	//Check ? GEngine->AddOnScreenDebugMessage(-1, 30.0f, FColor::Cyan, "Room " + RoomName + " spawned successfully") :
+		//GEngine->AddOnScreenDebugMessage(-1, 20.0f, FColor::Red, "Room spawn with path " + RoomName + " failed");
+	//UE_LOG(LogTemp, Display, TEXT("%s"), *a);
+	//Check ? UE_LOG(LogTemp, Display, TEXT("Room spawned successfully with path %s"), *RoomName) : UE_LOG(LogTemp, Warning, TEXT("Room spawn with path %s failed"), *RoomName);
+	if (Check)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Room spawned successfully with path %s"), *RoomName);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Room spawn with path %s failed"), *RoomName);
+	}
+}*/
 
 void ALevelSpawner_V1::SpawnRoom(UWorld* world, FString RoomName, FVector RoomVector, FRotator RoomRotator, int UniqueIndex)
 {
-	bool RoomSpawnedSuccess;
+	bool RoomSpawnedSuccess = false;
 	FString a;
-	//a.AppendInt(FMath::RandRange(0, 999999));
-	a.AppendInt(UniqueIndex);
+	a.AppendInt(CounterToSpawn);
+
 	ULevelStreamingDynamic::LoadLevelInstance(world, *RoomName, RoomVector, RoomRotator, RoomSpawnedSuccess, a);
-	DrawRoomCreationMassage(RoomSpawnedSuccess, RoomName);
+	if (RoomSpawnedSuccess)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Room spawned successfully with code %s"), *a);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Room spawn with code %s failed"), *a);
+	}
+	CounterToSpawn--;
 }
 
 void ALevelSpawner_V1::RecursivePath(int OldIndexX, int OldIndexY, int IndexX, int IndexY, UWorld* world)
@@ -135,7 +511,7 @@ void ALevelSpawner_V1::RecursivePath(int OldIndexX, int OldIndexY, int IndexX, i
 		int AdditionalIndexY = 0;
 		if (matrix[IndexX][IndexY + 1] == 2) //вправо направлена
 		{
-			Cell2RoomVector.AddBounded(FVector(IndexY * LevelsGridSize + LevelsGridSize / 2, IndexX * LevelsGridSize, 0));
+			Cell2RoomVector = FVector(IndexY * LevelsGridSize + LevelsGridSize / 2, IndexX * LevelsGridSize, 0);
 			AdditionalIndexX = IndexX;
 			AdditionalIndexY = IndexY + 1;
 			if (matrix[IndexX - 1][IndexY + 1] != 0) //вверх выход
@@ -162,7 +538,7 @@ void ALevelSpawner_V1::RecursivePath(int OldIndexX, int OldIndexY, int IndexX, i
 		}
 		else if (matrix[IndexX][IndexY - 1] == 2) //влево направлена
 		{
-			Cell2RoomVector.AddBounded(FVector(IndexY * LevelsGridSize - LevelsGridSize / 2, IndexX * LevelsGridSize, 0));
+			Cell2RoomVector = FVector(IndexY * LevelsGridSize - LevelsGridSize / 2, IndexX * LevelsGridSize, 0);
 			AdditionalIndexX = IndexX;
 			AdditionalIndexY = IndexY - 1;
 			if (matrix[IndexX - 1][IndexY - 1] != 0) //вверх выход
@@ -189,7 +565,7 @@ void ALevelSpawner_V1::RecursivePath(int OldIndexX, int OldIndexY, int IndexX, i
 		}
 		else if (matrix[IndexX + 1][IndexY] == 2) //вниз направлена
 		{
-			Cell2RoomVector.AddBounded(FVector(IndexY * LevelsGridSize, IndexX * LevelsGridSize + LevelsGridSize / 2, 0));
+			Cell2RoomVector = FVector(IndexY * LevelsGridSize, IndexX * LevelsGridSize + LevelsGridSize / 2, 0);
 			AdditionalIndexX = IndexX + 1;
 			AdditionalIndexY = IndexY;
 			if (matrix[IndexX + 1][IndexY + 1] != 0) //вправо выход
@@ -216,7 +592,7 @@ void ALevelSpawner_V1::RecursivePath(int OldIndexX, int OldIndexY, int IndexX, i
 		}
 		else if (matrix[IndexX - 1][IndexY] == 2) //вверх направлена
 		{
-			Cell2RoomVector.AddBounded(FVector(IndexY * LevelsGridSize, IndexX * LevelsGridSize - LevelsGridSize / 2, 0));
+			Cell2RoomVector = FVector(IndexY * LevelsGridSize, IndexX * LevelsGridSize - LevelsGridSize / 2, 0);
 			AdditionalIndexX = IndexX - 1;
 			AdditionalIndexY = IndexY;
 			if (matrix[IndexX - 1][IndexY + 1] != 0) //вправо выход
@@ -261,7 +637,8 @@ void ALevelSpawner_V1::RecursivePath(int OldIndexX, int OldIndexY, int IndexX, i
 		{
 			if (matrix[IndexX + 1][IndexY] == 4) //вариант с правым выходом
 			{
-				Cell4RoomVector.AddBounded(FVector(IndexY * LevelsGridSize + LevelsGridSize / 2, IndexX * LevelsGridSize + LevelsGridSize / 2, 0));
+				//Cell4RoomVector.AddBounded(FVector(IndexY * LevelsGridSize + LevelsGridSize / 2, IndexX * LevelsGridSize + LevelsGridSize / 2, 0));
+				Cell4RoomVector = FVector(IndexY * LevelsGridSize + LevelsGridSize / 2, IndexX * LevelsGridSize + LevelsGridSize / 2, 0);
 				Cell4RoomRotator.Add(0, 0, 0);
 				NewIndexX = IndexX + 1;
 				NewIndexY = IndexY + 2;
@@ -272,7 +649,8 @@ void ALevelSpawner_V1::RecursivePath(int OldIndexX, int OldIndexY, int IndexX, i
 			}
 			else if (matrix[IndexX - 1][IndexY] == 4) //вариант с левым выходом
 			{
-				Cell4RoomVector.AddBounded(FVector(IndexY * LevelsGridSize + LevelsGridSize / 2, IndexX * LevelsGridSize - LevelsGridSize / 2, 0));
+				//Cell4RoomVector.AddBounded(FVector(IndexY * LevelsGridSize + LevelsGridSize / 2, IndexX * LevelsGridSize - LevelsGridSize / 2, 0));
+				Cell4RoomVector = FVector(IndexY * LevelsGridSize + LevelsGridSize / 2, IndexX * LevelsGridSize - LevelsGridSize / 2, 0);
 				Cell4RoomRotator.Add(0, 0, 0);
 				NewIndexX = IndexX - 1;
 				NewIndexY = IndexY + 2;
@@ -286,7 +664,8 @@ void ALevelSpawner_V1::RecursivePath(int OldIndexX, int OldIndexY, int IndexX, i
 		{
 			if (matrix[IndexX - 1][IndexY] == 4) //вариант с правым выходом
 			{
-				Cell4RoomVector.AddBounded(FVector(IndexY * LevelsGridSize - LevelsGridSize / 2, IndexX * LevelsGridSize - LevelsGridSize / 2, 0));
+				//Cell4RoomVector.AddBounded(FVector(IndexY * LevelsGridSize - LevelsGridSize / 2, IndexX * LevelsGridSize - LevelsGridSize / 2, 0));
+				Cell4RoomVector = FVector(IndexY * LevelsGridSize - LevelsGridSize / 2, IndexX * LevelsGridSize - LevelsGridSize / 2, 0);
 				Cell4RoomRotator.Add(0, 180, 0);
 				NewIndexX = IndexX - 1;
 				NewIndexY = IndexY - 2;
@@ -297,7 +676,8 @@ void ALevelSpawner_V1::RecursivePath(int OldIndexX, int OldIndexY, int IndexX, i
 			}
 			else if (matrix[IndexX + 1][IndexY] == 4) //вариант с левым выходом
 			{
-				Cell4RoomVector.AddBounded(FVector(IndexY * LevelsGridSize - LevelsGridSize / 2, IndexX * LevelsGridSize + LevelsGridSize / 2, 0));
+				//Cell4RoomVector.AddBounded(FVector(IndexY * LevelsGridSize - LevelsGridSize / 2, IndexX * LevelsGridSize + LevelsGridSize / 2, 0));
+				Cell4RoomVector = FVector(IndexY * LevelsGridSize - LevelsGridSize / 2, IndexX * LevelsGridSize + LevelsGridSize / 2, 0);
 				Cell4RoomRotator.Add(0, 180, 0);
 				NewIndexX = IndexX + 1;
 				NewIndexY = IndexY - 2;
@@ -311,7 +691,8 @@ void ALevelSpawner_V1::RecursivePath(int OldIndexX, int OldIndexY, int IndexX, i
 		{
 			if (matrix[IndexX][IndexY - 1] == 4) //вариант с правым выходом
 			{
-				Cell4RoomVector.AddBounded(FVector(IndexY * LevelsGridSize - LevelsGridSize / 2, IndexX * LevelsGridSize + LevelsGridSize / 2, 0));
+				//Cell4RoomVector.AddBounded(FVector(IndexY * LevelsGridSize - LevelsGridSize / 2, IndexX * LevelsGridSize + LevelsGridSize / 2, 0));
+				Cell4RoomVector = FVector(IndexY * LevelsGridSize - LevelsGridSize / 2, IndexX * LevelsGridSize + LevelsGridSize / 2, 0);
 				Cell4RoomRotator.Add(0, 90, 0);
 				NewIndexX = IndexX + 2;
 				NewIndexY = IndexY - 1;
@@ -322,7 +703,8 @@ void ALevelSpawner_V1::RecursivePath(int OldIndexX, int OldIndexY, int IndexX, i
 			}
 			else if (matrix[IndexX][IndexY + 1] == 4) //вариант с левым выходом
 			{
-				Cell4RoomVector.AddBounded(FVector(IndexY * LevelsGridSize + LevelsGridSize / 2, IndexX * LevelsGridSize + LevelsGridSize / 2, 0));
+				//Cell4RoomVector.AddBounded(FVector(IndexY * LevelsGridSize + LevelsGridSize / 2, IndexX * LevelsGridSize + LevelsGridSize / 2, 0));
+				Cell4RoomVector = FVector(IndexY * LevelsGridSize + LevelsGridSize / 2, IndexX * LevelsGridSize + LevelsGridSize / 2, 0);
 				Cell4RoomRotator.Add(0, 90, 0);
 				NewIndexX = IndexX + 2;
 				NewIndexY = IndexY + 1;
@@ -336,7 +718,8 @@ void ALevelSpawner_V1::RecursivePath(int OldIndexX, int OldIndexY, int IndexX, i
 		{
 			if (matrix[IndexX][IndexY + 1] == 4) //вариант с правым выходом
 			{
-				Cell4RoomVector.AddBounded(FVector(IndexY * LevelsGridSize + LevelsGridSize / 2, IndexX * LevelsGridSize - LevelsGridSize / 2, 0));
+				//Cell4RoomVector.AddBounded(FVector(IndexY * LevelsGridSize + LevelsGridSize / 2, IndexX * LevelsGridSize - LevelsGridSize / 2, 0));
+				Cell4RoomVector = FVector(IndexY * LevelsGridSize + LevelsGridSize / 2, IndexX * LevelsGridSize - LevelsGridSize / 2, 0);
 				Cell4RoomRotator.Add(0, -90, 0);
 				NewIndexX = IndexX - 2;
 				NewIndexY = IndexY + 1;
@@ -347,7 +730,8 @@ void ALevelSpawner_V1::RecursivePath(int OldIndexX, int OldIndexY, int IndexX, i
 			}
 			else if (matrix[IndexX][IndexY - 1] == 4) //вариант с левым выходом
 			{
-				Cell4RoomVector.AddBounded(FVector(IndexY * LevelsGridSize - LevelsGridSize / 2, IndexX * LevelsGridSize - LevelsGridSize / 2, 0));
+				//Cell4RoomVector.AddBounded(FVector(IndexY * LevelsGridSize - LevelsGridSize / 2, IndexX * LevelsGridSize - LevelsGridSize / 2, 0));
+				Cell4RoomVector = FVector(IndexY * LevelsGridSize - LevelsGridSize / 2, IndexX * LevelsGridSize - LevelsGridSize / 2, 0);
 				Cell4RoomRotator.Add(0, -90, 0);
 				NewIndexX = IndexX - 2;
 				NewIndexY = IndexY - 1;
@@ -416,24 +800,37 @@ void ALevelSpawner_V1::RecursivePath(int OldIndexX, int OldIndexY, int IndexX, i
 	}
 }
 
+void ALevelSpawner_V1::PrintMap(std::vector<std::vector<int>>& mas)
+{
+	for (size_t i = 0; i < mas.size(); i++)
+	{
+		FString a;
+		for (size_t j = 0; j < mas[0].size(); j++)
+		{
+			a.AppendInt(mas[i][j]);
+		}
+		UE_LOG(LogTemp, Display, TEXT("%s"), *a);
+	}
+}
+
 // Called when the game starts or when spawned
 void ALevelSpawner_V1::BeginPlay()
 {
 	Super::BeginPlay();
-	if (NumberOfBeginRooms < 1 || NumberOf1CellRooms < 1 || NumberOf2CellRooms < 1 || NumberOfEndRooms < 1/* || NumberOf4CellRooms<1*/)
+	if (NumberOfBeginRooms < 1 || NumberOf1CellRooms < 1 || NumberOf2CellRooms < 1 || NumberOfEndRooms < 1 || NumberOf4CellRooms < 1)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 25.f, FColor::Yellow, "BEGINPLAY CALLED SEVERAL TIMES, SOME OF THE UPROPERTIES EQUALS 0");
 		return;
 	}
-	UWorld* world = GetWorld();
-	if (world) GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Cyan, "World found");
+	UWorld* World = GetWorld();
+	if (World) GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Cyan, "World found");
 	else
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 20.f, FColor::Red, "World not found");
 		return;
 	}
 
-	UGameInstanceToSave* const TempGameInstance = world != NULL ? world->GetGameInstance<UGameInstanceToSave>() : NULL;
+	UGameInstanceToSave* const TempGameInstance = World != nullptr ? World->GetGameInstance<UGameInstanceToSave>() : nullptr;
 	if (TempGameInstance) GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Cyan, "GameInstance found");
 	else
 	{
@@ -442,25 +839,29 @@ void ALevelSpawner_V1::BeginPlay()
 	}
 	FGenericPlatformMath::RandInit(TempGameInstance->Seed);
 
-	FString temp = "Generated Seed: ";
-	temp.AppendInt(TempGameInstance->Seed);
-	GEngine->AddOnScreenDebugMessage(-1, INFINITY, FColor::Emerald, temp);
+	FString Temp = "Generated Seed: ";
+	Temp.AppendInt(TempGameInstance->Seed);
+	GEngine->AddOnScreenDebugMessage(-1, INFINITY, FColor::Emerald, Temp);
 
-	for (int i = 0; i < MatrixVerticalSize; i++)
+	for (size_t i = 0; i < MatrixVerticalSize; i++)
 	{
-		std::vector<int> temp_mat;
+		std::vector<int> Temp_Mat;
 		for (size_t j = 0; j < MatrixHorizontalSize; j++)
 		{
-			temp_mat.push_back('0');
+			Temp_Mat.push_back(0);
 		}
-		matrix.push_back(temp_mat);
+		matrix.push_back(Temp_Mat);
 	}
+	
+	Generation_Map_Test1_int(matrix, NumberOfRoomsToSpawn - 1);
+
+	PrintMap(matrix);
 
 	for (size_t i = 0; i < matrix.size(); i++)
 		for (size_t j = 0; j < matrix[0].size(); j++)
 			if (matrix[i][j] == 8)
 			{
-				RecursivePath(0, 0, i, j, world);
+				RecursivePath(0, 0, i, j, World);
 				goto end_loop;
 			}
 end_loop:;
