@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "vector"
-#include "string"
 #include "Engine/DataTable.h"
 #include "Engine/LevelStreamingDynamic.h"
 #include "UObject/ConstructorHelpers.h"
@@ -28,7 +27,7 @@ struct FRoomDataStruct : public FTableRowBase
 };
 
 UCLASS()
-class MEATBALL_API ALevelSpawner3D_V1 : public AActor
+class MEATBALL_API ALevelSpawner3D_V1 final : public AActor
 {
 	GENERATED_BODY()
 
@@ -72,9 +71,8 @@ public:
 	void PrintMatrixToLog();
 	void SpawnRoom(UWorld* World, FString RoomName, FVector RoomVector, FRotator RoomRotator);
 	int ProcedurallyGenerateSetOfRooms(UWorld* World);
-	void SpawnSetOfRooms(UWorld* World/*, TArray<FRoomDataToSpawnStruct*> TempRoomsToSpawnSet*/);
+	void SpawnSetOfRooms(UWorld* World);
 	static FVector RotateFVectorAroundZ(FVector InputVector, int Angle);
-	static FCoord RotateFCoordAroundZ(FCoord InputCoord, int Angle);
 	static int CalculateAngleByCoords(FCoord PrevCoords, FCoord CurrentCoords);
 	bool CheckIfRoomFits(FRoomDataStruct* RoomDataStruct, FCoord CurrentCoords, int RoomAngle);
 
@@ -84,7 +82,6 @@ public:
 private:
 	int CounterToSpawn = 5000;
 	std::vector<std::vector<std::vector<int>>> Matrix;
-	//TArray<FRoomDataToSpawnStruct*> TempRoomsToSpawnSet;
 	TArray<FString> TempRoomNames_Array;
 	TArray<FVector> TempVectorsToSpawn_Array;
 	TArray<FRotator> TempRotatorsToSpawn_Array;
