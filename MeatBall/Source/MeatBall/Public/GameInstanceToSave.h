@@ -17,5 +17,6 @@ private:
 	UGameInstanceToSave();
 
 public:
+	UPROPERTY(BlueprintReadOnly)
 	int32 Seed;
 };

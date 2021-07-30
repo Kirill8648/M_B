@@ -7,6 +7,7 @@
 #include "vector"
 #include "Engine/DataTable.h"
 #include "Engine/LevelStreamingDynamic.h"
+#include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
 #include "LevelSpawner3D_V1.generated.h"
 
@@ -64,17 +65,29 @@ public:
 		int Z;
 	};
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FName> RoomNamesToUnload;
+
 	// Sets default values for this actor's properties
 	ALevelSpawner3D_V1();
-
 	void SetMatrix();
+	//----------Prints------------
 	void PrintMatrixToLog();
+	void PrintSpawnedRoomNames();
+	//----------------------------
 	void SpawnRoom(UWorld* World, FString RoomName, FVector RoomVector, FRotator RoomRotator);
 	int ProcedurallyGenerateSetOfRooms(UWorld* World);
 	void SpawnSetOfRooms(UWorld* World);
+	void UnloadAllSpawnedLevels(UWorld* World);
 	static FVector RotateFVectorAroundZ(FVector InputVector, int Angle);
 	static int CalculateAngleByCoords(FCoord PrevCoords, FCoord CurrentCoords);
 	bool CheckIfRoomFits(FRoomDataStruct* RoomDataStruct, FCoord CurrentCoords, int RoomAngle);
+
+	UFUNCTION(BlueprintCallable)
+	void RespawnAllLevels();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FVector> TempVectorsToSpawn_Array;
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -83,7 +96,7 @@ private:
 	int CounterToSpawn = 5000;
 	std::vector<std::vector<std::vector<int>>> Matrix;
 	TArray<FString> TempRoomNames_Array;
-	TArray<FVector> TempVectorsToSpawn_Array;
+	
 	TArray<FRotator> TempRotatorsToSpawn_Array;
 	size_t NumberOfRows;
 

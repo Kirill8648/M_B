@@ -8,6 +8,12 @@ ALevelSpawner3D_V1::ALevelSpawner3D_V1()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	//PrimaryActorTick.bCanEverTick = true;
+	/*static ConstructorHelpers::FObjectFinder<UDataTable> RoomsToSpawnDataObject(
+		TEXT("DataTable'/Game/Data/Rooms_DataTable_Final.Rooms_DataTable_Final'"));
+	if (RoomsToSpawnDataObject.Succeeded())
+	{
+		RoomsDataTable = RoomsToSpawnDataObject.Object;
+	}*/
 }
 
 void ALevelSpawner3D_V1::SetMatrix()
@@ -81,6 +87,15 @@ void ALevelSpawner3D_V1::PrintMatrixToLog()
 	}
 }
 
+void ALevelSpawner3D_V1::PrintSpawnedRoomNames()
+{
+	UE_LOG(LogTemp, Display, TEXT("Spawned level names:"))
+	for (auto Elem : RoomNamesToUnload)
+	{
+		UE_LOG(LogTemp, Display, TEXT("%t"), *Elem.ToString());
+	}
+}
+
 FVector ALevelSpawner3D_V1::RotateFVectorAroundZ(const FVector InputVector, const int Angle)
 {
 	switch (Angle)
@@ -141,6 +156,37 @@ bool ALevelSpawner3D_V1::CheckIfRoomFits(FRoomDataStruct* RoomDataStruct, const 
 	return true;
 }
 
+void ALevelSpawner3D_V1::RespawnAllLevels()
+{
+	FLatentActionInfo LatentInfo;
+	LatentInfo.CallbackTarget = this;
+	LatentInfo.ExecutionFunction = FName("Tick");
+	LatentInfo.Linkage = 0;
+	LatentInfo.UUID = 0;
+	UGameplayStatics::UnloadStreamLevel(
+		GetWorld(), RoomNamesToUnload[FGenericPlatformMath::Rand() % RoomNamesToUnload.Num() - 2], LatentInfo,
+		false);
+
+	/*UWorld* World = GetWorld();
+
+	UnloadAllSpawnedLevels(World);
+	TempRoomNames_Array.Reset();
+	TempVectorsToSpawn_Array.Reset();
+	TempRotatorsToSpawn_Array.Reset();
+	RoomNamesToUnload.Reset();
+	SetMatrix();
+
+	while (ProcedurallyGenerateSetOfRooms(World))
+	{
+		TempRoomNames_Array.Reset();
+		TempVectorsToSpawn_Array.Reset();
+		TempRotatorsToSpawn_Array.Reset();
+		RoomNamesToUnload.Reset();
+		SetMatrix();
+	}*/
+}
+
+
 void ALevelSpawner3D_V1::SpawnRoom(UWorld* World, const FString RoomName, const FVector RoomVector,
                                    const FRotator RoomRotator)
 {
@@ -149,6 +195,13 @@ void ALevelSpawner3D_V1::SpawnRoom(UWorld* World, const FString RoomName, const 
 	a.AppendInt(CounterToSpawn);
 
 	ULevelStreamingDynamic::LoadLevelInstance(World, *RoomName, RoomVector, RoomRotator, RoomSpawnedSuccess, a);
+
+	FString TempRoomNameToUnload;
+	RoomName.Split("/", &TempRoomNameToUnload, nullptr, ESearchCase::IgnoreCase, ESearchDir::FromEnd);
+	TempRoomNameToUnload.Append("/UEDPIE_0_");
+	TempRoomNameToUnload.Append(a);
+	RoomNamesToUnload.Add(*TempRoomNameToUnload);
+
 	if (RoomSpawnedSuccess)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Room spawned successfully with code %s"), *a);
@@ -288,23 +341,49 @@ void ALevelSpawner3D_V1::SpawnSetOfRooms(UWorld* World)
 	}
 }
 
+void ALevelSpawner3D_V1::UnloadAllSpawnedLevels(UWorld* World)
+{
+	//ULevelStreaming* LevelStreaming = nullptr;
+	//UGameplayStatics* LevelStreaming;
+
+	//LevelStreaming->SetIsRequestingUnloadAndRemoval(true);
+	PrintSpawnedRoomNames();
+	for (auto& Elem : RoomNamesToUnload)
+	{
+		const FLatentActionInfo LatentInfo;
+		/*LatentInfo.CallbackTarget = this;
+		LatentInfo.ExecutionFunction = "UnloadAllSpawnedLevels";
+		LatentInfo.Linkage = 0;
+		LatentInfo.UUID = 0;*/
+		UGameplayStatics::UnloadStreamLevel(World, Elem, LatentInfo, false);
+	}
+
+	/*PrintSpawnedRoomNames();
+	const FLatentActionInfo LatentInfo;
+	UGameplayStatics::UnloadStreamLevel(World, *RoomNamesToUnload[0], LatentInfo, false);
+	UE_LOG(LogTemp, Warning, TEXT("Unloaded level"), *RoomNamesToUnload[0]);
+	UGameplayStatics::UnloadStreamLevel(World, *RoomNamesToUnload[1], LatentInfo, false);
+	UE_LOG(LogTemp, Warning, TEXT("Unloaded level"), *RoomNamesToUnload[1]);
+	UGameplayStatics::UnloadStreamLevel(World, *RoomNamesToUnload[2], LatentInfo, false);
+	UE_LOG(LogTemp, Warning, TEXT("Unloaded level"), *RoomNamesToUnload[2]);
+	UGameplayStatics::UnloadStreamLevel(World, *RoomNamesToUnload[3], LatentInfo, false);
+	UE_LOG(LogTemp, Warning, TEXT("Unloaded level"), *RoomNamesToUnload[3]);
+	UGameplayStatics::UnloadStreamLevel(World, *RoomNamesToUnload[4], LatentInfo, false);
+	UE_LOG(LogTemp, Warning, TEXT("Unloaded level"), *RoomNamesToUnload[4]);*/
+}
+
 // Called when the game starts or when spawned
 void ALevelSpawner3D_V1::BeginPlay()
 {
 	Super::BeginPlay();
 
-	/*static ConstructorHelpers::FObjectFinder<UDataTable> RoomsToSpawnDataObject(
-		TEXT("DataTable'/Game/Data/RoomsToSpawn_DataTable.RoomsToSpawn_DataTable'"));
-	if (RoomsToSpawnDataObject.Succeeded())
-	{
-		RoomsDataTable = RoomsToSpawnDataObject.Object;
-	}*/
-
-
 	// Calculate NumberOfRows
 	if (RoomsDataTable)
 	{
-		const TArray<TArray<FString>> TempArr = RoomsDataTable->GetTableData();
+		/*const TArray<TArray<FString>> TempArr = RoomsDataTable->GetTableData();
+		NumberOfRows = TempArr.Num() - 1 - 2;*/
+
+		const TArray<FName> TempArr = RoomsDataTable->GetRowNames();
 		NumberOfRows = TempArr.Num() - 1 - 2;
 	}
 	if (NumberOfRows)
@@ -320,9 +399,20 @@ void ALevelSpawner3D_V1::BeginPlay()
 		TempRoomNames_Array.Reset();
 		TempVectorsToSpawn_Array.Reset();
 		TempRotatorsToSpawn_Array.Reset();
+		RoomNamesToUnload.Reset();
 		SetMatrix();
 		Attempts++;
 	}
+	//PrintSpawnedRoomNames();
+
+	/*FTimerHandle handle;
+	float delayTime = 5.0;
+	GetWorld()->GetTimerManager().SetTimer(handle, [this]()
+	{
+		bool IsReloading = false;
+	}, delayTime, 1);
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan,
+	                                 FString::Printf(TEXT("Таймер прошел")));*/
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan,
 	                                 FString::Printf(TEXT("Attempts to generate: %d"), Attempts));
 }
