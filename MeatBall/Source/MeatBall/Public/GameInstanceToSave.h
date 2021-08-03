@@ -13,7 +13,7 @@ UCLASS()
 class MEATBALL_API UGameInstanceToSave : public UGameInstance
 {
 	GENERATED_BODY()
-private:
+	
 	UGameInstanceToSave();
 
 public:
