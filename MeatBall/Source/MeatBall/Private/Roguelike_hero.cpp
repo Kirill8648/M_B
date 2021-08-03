@@ -102,6 +102,5 @@ void ARoguelike_hero::App_stat_item(Fcharacteristic_passiv_item char_object, UCh
 	//GetCharacterMovement()->JumpZVelocity += char_object.jump_height;
 
 	com->MaxWalkSpeed += char_object.speed;
-
 	//static const UCharacterMovementComponent* com = this.ACharacter::GetCharacterMovement();
 }
