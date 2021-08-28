@@ -17,6 +17,12 @@ class MEATBALL_API UGameInstanceToSave : public UGameInstance
 	UGameInstanceToSave();
 
 public:
-	UPROPERTY(BlueprintReadOnly)
-	int32 Seed;
+	UPROPERTY(BlueprintReadWrite)
+	int32 Seed = 0;
+
+	UFUNCTION(BlueprintCallable)
+	void RandomizeSeed();
+
+	UFUNCTION(BlueprintCallable)
+	void InitializeRandomGeneratorsBySeed() const;
 };
